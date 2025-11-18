@@ -10,7 +10,7 @@ IMAGES = []
 INDEX = 0
 LOCK = threading.Lock()
 
-def load_images(directory):
+def load_images(directory = "C://home//bzabawa123//Development//frames"):
     global IMAGE_DIR, IMAGES, INDEX
     IMAGE_DIR = os.path.abspath(directory)
     files = sorted(
@@ -29,7 +29,7 @@ def load_images(directory):
 class LiveMapHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         global INDEX
-        if self.path.startswith("/frame/next"):
+        if self.path.startswith("../frame/next"):
             with LOCK:
                 fname = IMAGES[INDEX]
                 INDEX = (INDEX + 1) % len(IMAGES)

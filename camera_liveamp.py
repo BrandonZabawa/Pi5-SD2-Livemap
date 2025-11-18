@@ -1,34 +1,29 @@
-import time
+from mss import mss
 from pathlib import Path
+from PIL import Image
+import time
 
-import mss
-from mss import tools
-
-# Folder where screenshots will be stored
-SAVE_DIR = Path("Development/frames")
-SAVE_DIR.mkdir(parents=True, exist_ok=True)
-
+SAVE_DIR = Path("../frames")
+SAVE_DIR.mkdir(exist_ok=True)
 
 def main():
-    with mss.mss() as sct:
-        # Monitor 1 = primary display. If you have multiple, adjust index.
-        monitor = sct.monitors[1]
+    with mss() as sct:
+        monitor = sct.monitors[1]  # 1 = primary monitor
 
         while True:
-            ts = int(time.time() * 1000)
-            path = SAVE_DIR / f"screen_{ts}.png"
-
-            # Grab full-screen
             sct_img = sct.grab(monitor)
 
-            # Save as PNG
-            tools.to_png(sct_img.rgb, sct_img.size, output=str(path))
-            print(f"Saved {path}")
+            # Convert MSS raw data → Pillow image
+            img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
 
-            # Adjust capture rate (0.5s = 2 fps)
-            time.sleep(10)
+            ts = int(time.time() * 1000)
+            out_path = SAVE_DIR / f"screenshot.jpg"
 
+            # Save as JPEG instead of PNG
+            img.save(out_path, "JPEG", quality=80)
+            print("Saved", out_path)
+
+            time.sleep(5)  # every 5 seconds
 
 if __name__ == "__main__":
     main()
-
