@@ -3,7 +3,8 @@ from pathlib import Path
 from PIL import Image
 import time
 
-SAVE_DIR = Path("../frames")
+# Save inside the repo folder: Pi5-SD2-Livemap/frame/
+SAVE_DIR = Path("frame")
 SAVE_DIR.mkdir(exist_ok=True)
 
 def main():
@@ -17,9 +18,8 @@ def main():
             img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
 
             ts = int(time.time() * 1000)
-            out_path = SAVE_DIR / f"screenshot.jpg"
+            out_path = SAVE_DIR / f"screen_{ts}.jpg"
 
-            # Save as JPEG instead of PNG
             img.save(out_path, "JPEG", quality=80)
             print("Saved", out_path)
 

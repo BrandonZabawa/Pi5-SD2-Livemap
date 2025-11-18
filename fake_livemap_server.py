@@ -10,7 +10,7 @@ IMAGES = []
 INDEX = 0
 LOCK = threading.Lock()
 
-def load_images(directory = "C://home//bzabawa123//Development//frames"):
+def load_images(directory):
     global IMAGE_DIR, IMAGES, INDEX
     IMAGE_DIR = os.path.abspath(directory)
     files = sorted(
@@ -29,37 +29,34 @@ def load_images(directory = "C://home//bzabawa123//Development//frames"):
 class LiveMapHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         global INDEX
-        if self.path.startswith("../frame/next"):
-            with LOCK:
-                fname = IMAGES[INDEX]
-                INDEX = (INDEX + 1) % len(IMAGES)
 
-            fpath = os.path.join(IMAGE_DIR, fname)
-            try:
-                with open(fpath, "rb") as f:
-                    data = f.read()
-            except OSError as e:
-                self.send_response(500)
-                self.send_header("Content-Type", "text/plain")
-                self.end_headers()
-                self.wfile.write(f"Error reading {fname}: {e}".encode("utf-8"))
-                return
+        # Debug: see what path the client is actually using
+        print(f"[LiveMap] Incoming GET {self.path}")
 
-            self.send_response(200)
-            self.send_header("Content-Type", "image/jpeg")
-            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
-            self.end_headers()
-            self.wfile.write(data)
-            print(f"[LiveMap] Served {fname}")
-        else:
-          # simple 404
-            self.send_response(404)
+        with LOCK:
+            fname = IMAGES[INDEX]
+            INDEX = (INDEX + 1) % len(IMAGES)
+
+        fpath = os.path.join(IMAGE_DIR, fname)
+        try:
+            with open(fpath, "rb") as f:
+                data = f.read()
+        except OSError as e:
+            self.send_response(500)
             self.send_header("Content-Type", "text/plain")
             self.end_headers()
-            self.wfile.write(b"Not found")
+            self.wfile.write(f"Error reading {fname}: {e}".encode("utf-8"))
+            return
+
+        self.send_response(200)
+        self.send_header("Content-Type", "image/jpeg")
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+        self.end_headers()
+        self.wfile.write(data)
+        print(f"[LiveMap] Served {fname}")
 
     def log_message(self, fmt, *args):
-        # silence default logging; you already get our prints
+        # silence default logging
         return
 
 def main():
